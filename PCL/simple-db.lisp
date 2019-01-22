@@ -30,5 +30,37 @@
 		(if (not (y-or-n-p "Another? [y/n]: ")) (return))))
 
 
+;;; Print to file
+
+(defun save-db (filename)
+  (with-open-file (out filename
+					   :direction :output
+					   :if-exists :supersede)
+	(with-standard-io-syntax
+	  (print *db* out)))) 
+
+;;; Load from file
+
+(defun load-db (filename)
+  (with-open-file (in filename)
+	(with-standard-io-syntax
+	  (setf *db* (read in)))))
 
 
+;;; Query based on artist name
+(defun select-by-artist (artist)
+  (remove-if-not 
+	#'(lambda (cd) (equal (getf cd :artist) artist))
+  	*db*))
+
+;;; Generalised query
+
+
+(defun select (selector-fn)
+  (remove-if-not selector-fn *db*))
+
+
+;;; Artist selector function
+
+(defun artist-selector (artist)
+  (select #'(lambda (cd) (equal (getf cd :artist) artist))))
